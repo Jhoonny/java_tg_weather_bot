@@ -1,3 +1,8 @@
+/*
+    Class for saved user setting
+
+ */
+
 
 public class Users {
 

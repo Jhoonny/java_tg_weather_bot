@@ -1,4 +1,13 @@
-import org.telegram.telegrambots.*;
+/*
+* Test telegram bot
+* weather from openweathermap.org
+* for given location
+*
+ */
+
+/* imports */
+import org.telegram.telegrambots.ApiContextInitializer;
+import org.telegram.telegrambots.TelegramBotsApi;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
@@ -19,6 +28,7 @@ public class Bot extends TelegramLongPollingBot {
    private static String BotToken = conf.getToken();
    private static String BotUserName = conf.getNamebot();
 
+   /* last used location for buttoms */
    private class LastLocation {
        private String [] locations;
        private int length;
@@ -44,29 +54,22 @@ public class Bot extends TelegramLongPollingBot {
            }
            locations[i] = newLocation;
        }
+
    }
+
+    private LastLocation lastLocation = new LastLocation(4);
 
     @Override
     public String getBotToken() {
         return BotToken;
     }
+
     @Override
     public String getBotUsername() {
         return BotUserName;
     }
 
-    private LastLocation lastLocation = new LastLocation(4);
 
-    public static void main(String[] args) {
-        ApiContextInitializer.init();
-        TelegramBotsApi telegramBotApi = new TelegramBotsApi();
-
-        try {
-            telegramBotApi.registerBot(new Bot());
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
     @Override
     public void onUpdateReceived(Update update) {
         Message message = update.getMessage();
@@ -90,7 +93,7 @@ public class Bot extends TelegramLongPollingBot {
                     } catch (URISyntaxException e) {
                         sendMsg(message, "URL Syntax Exception.");
                     } catch (IOException e) {
-                        sendMsg(message, "NU am gasit localitatea : " + message.getText());
+                        sendMsg(message, "Location not found: " + message.getText());
                     }
             }
         }
@@ -116,7 +119,6 @@ public class Bot extends TelegramLongPollingBot {
 
     }
 
-
     public void setButtoms(SendMessage sendMessage) {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         sendMessage.setReplyMarkup(replyKeyboardMarkup);
@@ -133,13 +135,19 @@ public class Bot extends TelegramLongPollingBot {
             keyboardFirstRow.add(new KeyboardButton(lastLocation.getLocation(i)));
         }
         keyboardRowList.add(keyboardFirstRow);
-
-        // complet row buttom from /settings list
-//        KeyboardRow keyboardSecondRow = new KeyboardRow();
-//        keyboardSecondRow.add(new KeyboardButton("Chisinau"));
-//        keyboardRowList.add(keyboardSecondRow);
-
         replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
+    }
+
+    public static void main(String[] args) {
+        ApiContextInitializer.init();
+        TelegramBotsApi telegramBotApi = new TelegramBotsApi();
+
+        try {
+            telegramBotApi.registerBot(new Bot());
+            System.out.println("Bot start ...");
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
     }
 }
